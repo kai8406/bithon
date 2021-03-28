@@ -1,4 +1,4 @@
-package com.sbss.bithon.agent.plugin.mysql.metrics;
+package com.sbss.bithon.agent.plugin.mysql6.metrics;
 
 import com.sbss.bithon.agent.core.metric.collector.MetricCollectorManager;
 import com.sbss.bithon.agent.core.metric.domain.sql.SqlMetricCollector;
@@ -58,7 +58,7 @@ public class PreparedStatement {
     }
 
     /**
-     * {@link com.mysql.jdbc.PreparedStatement#execute()}
+     * {@link com.mysql.cj.jdbc.PreparedStatement#execute()}
      */
     public static class Execute extends AbstractExecute {
         @Override
@@ -73,7 +73,7 @@ public class PreparedStatement {
     }
 
     /**
-     * {@link com.mysql.jdbc.PreparedStatement#executeQuery()}
+     * {@link com.mysql.cj.jdbc.PreparedStatement#executeQuery()}
      */
     public static class ExecuteQuery extends AbstractExecute {
         @Override
@@ -83,7 +83,7 @@ public class PreparedStatement {
     }
 
     /**
-     * {@link com.mysql.jdbc.PreparedStatement#executeUpdate()}
+     * {@link com.mysql.cj.jdbc.PreparedStatement#executeUpdate()}
      */
     public static class ExecuteUpdate extends AbstractExecute {
         @Override

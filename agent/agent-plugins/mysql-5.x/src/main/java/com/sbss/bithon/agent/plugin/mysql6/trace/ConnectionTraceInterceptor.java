@@ -1,4 +1,4 @@
-package com.sbss.bithon.agent.plugin.mysql.trace;
+package com.sbss.bithon.agent.plugin.mysql6.trace;
 
 import com.sbss.bithon.agent.core.context.InterceptorContext;
 import com.sbss.bithon.agent.core.plugin.aop.bootstrap.AbstractInterceptor;

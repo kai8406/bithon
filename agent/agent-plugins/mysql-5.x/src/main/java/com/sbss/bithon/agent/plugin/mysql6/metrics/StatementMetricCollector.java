@@ -1,4 +1,4 @@
-package com.sbss.bithon.agent.plugin.mysql.metrics;
+package com.sbss.bithon.agent.plugin.mysql6.metrics;
 
 import com.sbss.bithon.agent.core.context.InterceptorContext;
 import com.sbss.bithon.agent.core.dispatcher.IMessageConverter;

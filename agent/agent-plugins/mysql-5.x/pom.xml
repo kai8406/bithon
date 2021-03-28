@@ -32,7 +32,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Plugin-Class>com.sbss.bithon.agent.plugin.mysql.MySqlPlugin</Plugin-Class>
+              <Plugin-Class>com.sbss.bithon.agent.plugin.mysql6.MySql6Plugin</Plugin-Class>
             </manifestEntries>
           </archive>
         </configuration>

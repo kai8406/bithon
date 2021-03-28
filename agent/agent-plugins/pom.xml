@@ -19,7 +19,8 @@
     <module>webserver-undertow</module>
     <module>webserver-jetty</module>
     <module>jvm</module>
-    <module>mysql-5.x-6.x</module>
+    <module>mysql-5.x</module>
+    <module>mysql-6.x</module>
     <module>mysql-8.x</module>
     <module>quartz2</module>
     <module>jdk-thread</module>
@@ -77,6 +78,11 @@
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
       <artifactId>agent-plugin-mysql-5.x-6.x</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.parent.groupId}</groupId>
+      <artifactId>agent-plugin-mysql-6.x</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

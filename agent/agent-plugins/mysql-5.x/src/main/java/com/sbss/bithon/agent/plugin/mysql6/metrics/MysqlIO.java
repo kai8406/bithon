@@ -1,4 +1,4 @@
-package com.sbss.bithon.agent.plugin.mysql.metrics;
+package com.sbss.bithon.agent.plugin.mysql6.metrics;
 
 import com.mysql.jdbc.Buffer;
 import com.mysql.jdbc.Field;

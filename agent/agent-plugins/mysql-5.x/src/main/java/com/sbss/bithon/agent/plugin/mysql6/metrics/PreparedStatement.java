@@ -1,4 +1,4 @@
-package com.sbss.bithon.agent.plugin.mysql.metrics;
+package com.sbss.bithon.agent.plugin.mysql6.metrics;
 
 import com.sbss.bithon.agent.core.metric.collector.MetricCollectorManager;
 import com.sbss.bithon.agent.core.metric.domain.sql.SqlMetricCollector;
@@ -8,30 +8,32 @@ import com.sbss.bithon.agent.core.plugin.aop.bootstrap.InterceptionDecision;
 import com.sbss.bithon.agent.core.utils.MiscUtils;
 
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author frankchen
  */
-public class Statement {
+public class PreparedStatement {
 
     static abstract class AbstractExecute extends AbstractInterceptor {
         private SqlMetricCollector sqlMetricCollector;
+        private StatementMetricCollector statementMetricCollector;
 
         @Override
         public boolean initialize() {
             sqlMetricCollector = MetricCollectorManager.getInstance()
                                                        .getOrRegister("mysql-metrics", SqlMetricCollector.class);
+            statementMetricCollector = StatementMetricCollector.getInstance();
             return true;
         }
 
         @Override
         public InterceptionDecision onMethodEnter(AopContext aopContext) {
             try {
-                java.sql.Statement statement = (java.sql.Statement) aopContext.getTarget();
-                String connectionString = MiscUtils.cleanupConnectionString(statement.getConnection()
-                                                                                     .getMetaData()
-                                                                                     .getURL());
-                aopContext.setUserContext(connectionString);
+                Statement statement = (Statement) aopContext.getTarget();
+                String connectionString = statement.getConnection().getMetaData().getURL();
+
+                aopContext.setUserContext(MiscUtils.cleanupConnectionString(connectionString));
             } catch (SQLException ignored) {
                 return InterceptionDecision.SKIP_LEAVE;
             }
@@ -47,15 +49,18 @@ public class Statement {
 
             sqlMetricCollector.getOrCreateMetric(connectionString)
                               .update(isQuery(aopContext), aopContext.hasException(), aopContext.getCostTime());
+
+
+            statementMetricCollector.sqlStats(aopContext, (String) aopContext.getUserContext());
         }
 
         protected abstract boolean isQuery(AopContext aopContext);
     }
 
     /**
-     * {@link com.mysql.jdbc.StatementImpl#executeInternal(String, boolean)}
+     * {@link com.mysql.jdbc.PreparedStatement#execute()}
      */
-    public static class ExecuteInternal extends AbstractExecute {
+    public static class Execute extends AbstractExecute {
         @Override
         protected boolean isQuery(AopContext aopContext) {
             Object result = aopContext.castReturningAs();
@@ -68,7 +73,7 @@ public class Statement {
     }
 
     /**
-     * {@link com.mysql.jdbc.StatementImpl#executeQuery(String)}
+     * {@link com.mysql.jdbc.PreparedStatement#executeQuery()}
      */
     public static class ExecuteQuery extends AbstractExecute {
         @Override
@@ -78,19 +83,9 @@ public class Statement {
     }
 
     /**
-     * {@link com.mysql.jdbc.StatementImpl#executeUpdate(String)}
+     * {@link com.mysql.jdbc.PreparedStatement#executeUpdate()}
      */
     public static class ExecuteUpdate extends AbstractExecute {
-        @Override
-        protected boolean isQuery(AopContext aopContext) {
-            return false;
-        }
-    }
-
-    /**
-     * {@link com.mysql.jdbc.StatementImpl#executeUpdateInternal(String, boolean, boolean)}
-     */
-    public static class ExecuteUpdateInternal extends AbstractExecute {
         @Override
         protected boolean isQuery(AopContext aopContext) {
             return false;
