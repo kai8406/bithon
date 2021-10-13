@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 bithon.org
+ *    Copyright 2020 bithon.cn
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,25 +20,36 @@ import org.bithon.agent.core.aop.descriptor.InterceptorDescriptor;
 import org.bithon.agent.core.aop.descriptor.MethodPointCutDescriptorBuilder;
 import org.bithon.agent.core.plugin.IPlugin;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.bithon.agent.core.aop.descriptor.InterceptorDescriptorBuilder.forClass;
 
 /**
  * @author frankchen
- * @date 2021-09-22 23:36
  */
 public class NettyPlugin implements IPlugin {
 
     @Override
     public List<InterceptorDescriptor> getInterceptors() {
-        return Collections.singletonList(
-            forClass("org.springframework.boot.web.embedded.netty.NettyWebServer")
+
+        return Arrays.asList(
+            // TODO: intercept shaded.io.netty.util.internal.PlatformDependent
+            // BUT seems shaded.* has been ignored in the core lib
+
+            forClass("io.netty.util.internal.PlatformDependent")
                 .methods(
                     MethodPointCutDescriptorBuilder.build()
-                                                   .onMethodAndNoArgs("start")
-                                                   .to("org.bithon.agent.plugin.netty.interceptor.NettyWebServerStart")
+                                                   .onMethodAndArgs("allocateDirectNoCleaner", "int")
+                                                   .to("org.bithon.agent.plugin.netty.interceptor.PlatformDependent$AllocateMemory"),
+
+                    MethodPointCutDescriptorBuilder.build()
+                                                   .onMethodAndArgs("freeDirectNoCleaner", "java.nio.ByteBuffer")
+                                                   .to("org.bithon.agent.plugin.netty.interceptor.PlatformDependent$FreeMemory"),
+
+                    MethodPointCutDescriptorBuilder.build()
+                                                   .onMethodAndArgs("reallocateMemory", "java.nio.ByteBuffer", "int")
+                                                   .to("org.bithon.agent.plugin.netty.interceptor.PlatformDependent$ReallocateMemory")
                 )
         );
     }

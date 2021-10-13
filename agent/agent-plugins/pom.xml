@@ -28,6 +28,7 @@
     <module>httpclient-okhttp32</module>
     <module>httpclient-jdk</module>
     <module>httpclient-apache</module>
+    <module>netty</module>
     <module>redis-jedis</module>
     <module>redis-lettuce-5.x</module>
     <module>mongodb</module>
@@ -104,6 +105,12 @@
     <dependency>
       <groupId>org.bithon.agent</groupId>
       <artifactId>agent-plugin-quartz2</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sbss.bithon.agent</groupId>
+      <artifactId>agent-plugin-netty</artifactId>
       <version>${project.version}</version>
     </dependency>
 

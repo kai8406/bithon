@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 bithon.org
+ *    Copyright 2020 bithon.cn
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.bithon.agent.plugin.jvm.mem;
 
 import org.bithon.agent.bootstrap.expt.AgentException;
+import org.bithon.agent.core.metric.domain.jvm.IDirectMemoryMetricProvider;
 import org.bithon.agent.core.metric.domain.jvm.MemoryCompositeMetric;
 import org.bithon.agent.core.metric.domain.jvm.MemoryRegionCompositeMetric;
 import org.bithon.agent.core.plugin.PluginClassLoaderManager;
@@ -42,6 +43,7 @@ public class MemoryMetricCollector {
                                                                              .get();
 
     private static IDirectMemoryCollector directMemoryCollector;
+    private static ServiceLoader<IDirectMemoryMetricProvider> directMemoryMetricProviders;
 
     public static void initDirectMemoryCollector() {
         ServiceLoader<IDirectMemoryCollector> spi = ServiceLoader.load(IDirectMemoryCollector.class,
@@ -67,6 +69,13 @@ public class MemoryMetricCollector {
                 throw new AgentException(cause);
             }
         }
+
+        //
+        // some libs use Unsafe.allocate directly to allocate direct memory
+        // so there are plugins for these libs to provide allocated memory metric
+        //
+        directMemoryMetricProviders = ServiceLoader.load(IDirectMemoryMetricProvider.class,
+                                                         PluginClassLoaderManager.getDefaultLoader());
     }
 
     public static MemoryCompositeMetric collectTotal() {
@@ -87,6 +96,13 @@ public class MemoryMetricCollector {
     }
 
     public static MemoryRegionCompositeMetric collectDirectMemory() {
-        return directMemoryCollector.collect();
+        MemoryRegionCompositeMetric metric = directMemoryCollector.collect();
+        if (directMemoryMetricProviders != null) {
+            for (IDirectMemoryMetricProvider provider : directMemoryMetricProviders) {
+                metric.used += provider.getUsed();
+            }
+            metric.committed = metric.max - metric.used;
+        }
+        return metric;
     }
 }
